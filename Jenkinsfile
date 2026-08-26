@@ -5,31 +5,45 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Code checked out from GitHub'
+                echo 'Checking out code from GitHub'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean compile'
             }
         }
 
-        stage('Show Target') {
+        stage('Test') {
             steps {
-                sh 'ls -lh target/'
+                echo 'Running application tests'
+                sh 'mvn test'
             }
         }
 
-        stage('Show JAR') {
+        stage('Package') {
             steps {
-                sh 'ls -lh target/*.jar'
+                sh 'mvn package'
             }
         }
 
-        stage('Run Application') {
+        stage('Deploy') {
             steps {
-                sh 'java -jar target/devops-java-app-1.0.jar'
+                sh '''
+                    mkdir -p deployed
+                    cp target/devops-java-app-1.0.jar deployed/
+                    echo "Application deployed successfully"
+                '''
+            }
+        }
+
+        stage('Verify') {
+            steps {
+                sh '''
+                    ls -lh deployed/devops-java-app-1.0.jar
+                    java -jar deployed/devops-java-app-1.0.jar
+                '''
             }
         }
     }
